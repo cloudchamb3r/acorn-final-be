@@ -45,9 +45,24 @@ create table attachment (
 );
 
 
+create table friends (
+    id number primary key,
+    nickname varchar2(100) not null
+);
+
+
+create table friends_member (
+    id number primary key,
+    friends_id varchar2(100) not null,
+    member_id varchar2(100) not null
+);
+
+
 create sequence member_seq start with 10000;
 create sequence channel_seq start with 10000;
 create sequence channel_member_seq start with 10000;
 create sequence topic_seq start with 10000;
 create sequence message_seq start with 10000;
 create sequence attachment_seq start with 10000;
+create sequence friends_seq start with 10000;
+create sequence friends_member_seq start with 10000;

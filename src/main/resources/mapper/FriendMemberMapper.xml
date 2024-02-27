@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.acorn.finals.mapper.friendMemberMapper">
+    <select id="findAll" resultType="friendMemberEntity">
+        select * from friend_member
+    </select>
+
+    <select id="findOneById" parameterType="int" resultType="friendMemberEntity">
+        select * from friend_member
+        where id = #{id}
+    </select>
+
+    <select id="findAllfriendByMemberId" parameterType="int" resultType="friendEntity">
+        select * from friend
+        join
+        (select friend_id as id from friend_member where member_id = #{memberId})
+        using (id)
+        order by id
+    </select>
+
+    <select id="findAllMemberByfriendId" parameterType="int" resultType="memberEntity">
+        select * from member
+        join
+        (select member_id as id from friend_member where friend_id = #{friendId})
+        using (id)
+        order by id
+    </select>
+
+    <insert id="insert" parameterType="friendMemberEntity">
+        <selectKey keyProperty="id" resultType="int" order="BEFORE">
+            select friend_member_seq.nextval from dual
+        </selectKey>
+        insert into friend_member (id, friend_id, member_id)
+        values (#{id}, #{friendId}, #{memberId})
+    </insert>
+
+    <update id="update" parameterType="friendMemberEntity">
+        update friend_member
+        set friend_id = #{friendId}, member_id = #{memberId}
+        where id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="int">
+        delete from friend_member
+        where id = #{id}
+    </delete>
+</mapper>
