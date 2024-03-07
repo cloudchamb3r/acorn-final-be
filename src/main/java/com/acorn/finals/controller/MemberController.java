@@ -2,13 +2,21 @@ package com.acorn.finals.controller;
 
 import com.acorn.finals.model.dto.ChannelDto;
 import com.acorn.finals.model.dto.MemberDto;
+import com.acorn.finals.model.entity.MemberEntity;
+import com.acorn.finals.model.entity.RefreshTokenEntity;
 import com.acorn.finals.service.MemberService;
 import java.util.List;
+
+import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +27,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class MemberController {
     private final MemberService memberService;
-    private final MemberDto mockUser = new MemberDto("admin@admin.com", "admin", 7777, null);
+
+    // channel member mapper
 
     /**
      * list all another user joined channel
@@ -38,8 +47,9 @@ public class MemberController {
      * @return
      */
     @GetMapping("/@me")
-    public MemberDto queryMyInfo() {
-        return null;
+    public MemberDto queryMyInfo(Authentication auth) {
+        var email = auth.getName();
+        return memberService.findMemberByEmail(email);
     }
 
     /**
@@ -48,9 +58,9 @@ public class MemberController {
      * @return list of channel
      */
     @GetMapping("/@me/channel")
-    public List<ChannelDto> listAllChannel() {
+    public List<ChannelDto> listAllChannel(Authentication auth) {
         // TODO: Authentication to MemberDto
-        return memberService.listAllChannels(mockUser);
+        return memberService.listAllChannelsByEmail(auth.getName());
     }
 
     /**
@@ -88,4 +98,36 @@ public class MemberController {
         MemberDto responseDto = memberService.changeNickandTag(dto);
         return ResponseEntity.ok().body(responseDto);
     }
+
+    /**
+     * signup url
+     *
+     * @param entity require nickname , hashtag
+     * @return boolean
+     */
+    @PostMapping("/signup")
+    public boolean join(@RequestBody MemberEntity entity) {
+        return memberService.signup(entity);
+    }
+
+    /**
+     * logout
+     *
+     * @return if RefreshToken delete and changeStatus return true nor false
+     */
+    @PostMapping("/logout")
+    public ResponseEntity<Boolean> logout(Authentication auth) {
+        //Cookie 값 지우기~
+        ResponseCookie refreshTokenCookie =
+                ResponseCookie.from("RefreshToken","")
+                        .maxAge(0)
+                        .httpOnly(true)
+                        .path("/")
+                        .build();
+        boolean logoutResult = memberService.TokenDeleteAndChangeStatus(auth.getName());
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
+                .body(logoutResult);
+    }
 }
+

@@ -27,12 +27,13 @@ public class TopicService {
         return new TopicDto(id, topicCreateRequest.getTitle());
     }
 
-    public boolean removeTopic(int topicId, TopicDto topicRemoveRequest) {
-        return topicMapper.deleteById(topicId) > 0;
+    public boolean removeTopic(int channelId, int topicId) {
+        return topicMapper.delete(channelId, topicId) > 0;
     }
 
     public boolean updateTopic(int channelId, int topicId, TopicDto topicUpdateRequest) {
         var topicEntity = topicUpdateRequest.toEntity(channelId);
+        topicEntity.setId(topicId);
         return topicMapper.update(topicEntity) > 0;
     }
 }

@@ -16,11 +16,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -29,17 +24,25 @@ public class SecurityConfig {
     private final CorsPropertiesConfig corsConfig;
     private final CustomAuthenticationSuccessHandler successHandler;
     private final JwtFilter jwtFilter;
+//    private final AcornCorsFilter acornCorsFilter;
 
-    @Bean
-    CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
+    private final String[] whiteList = {
+            "/chat/channel/*/topic/*",
+            "/connection/ping",
+            "/connection/channel/*/members"
+    };
 
-        configuration.setAllowedOrigins(List.of(corsConfig.getAllowedOrigins()));
-        configuration.setAllowedMethods(List.of(CorsConfiguration.ALL));
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+//    @Bean
+//    CorsConfigurationSource corsConfigurationSource() {
+//        CorsConfiguration configuration = new CorsConfiguration();
+//
+//        configuration.setAllowedOrigins(List.of(corsConfig.getAllowedOrigins()));
+//        configuration.setAllowedMethods(List.of(CorsConfiguration.ALL));
+//        configuration.setAllowCredentials(true);
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        source.registerCorsConfiguration("/**", configuration);
+//        return source;
+//    }
 
 
     @Bean
@@ -47,11 +50,16 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable);
         http.formLogin(AbstractHttpConfigurer::disable);
         http.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
-        http.authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+
+        http.authorizeHttpRequests(auth ->
+                auth
+                        .requestMatchers(whiteList).permitAll()
+                        .anyRequest().authenticated()
+        );
+
         http.oauth2Login(o -> {
             o.successHandler(successHandler);
             o.failureHandler(new CustomAuthenticationFailureHandler());
-//            o.loginPage("/api/login");
             o.permitAll();
         });
         http.sessionManagement(config -> config.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

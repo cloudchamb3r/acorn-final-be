@@ -23,4 +23,5 @@ public interface MemberMapper {
 
     int deleteById(int id);
 
+    int logoutStatus(String email);
 }

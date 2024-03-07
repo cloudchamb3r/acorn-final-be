@@ -24,12 +24,15 @@ public class CustomUserDetailService implements UserDetailsService {
         MemberEntity entity = mapper.findOneByEmail(username);
         //만일 저장된 userName이 없다면
         if (entity == null) {
-            //예외를 발생시킨다
-            throw new UsernameNotFoundException("존재하지 않는 사용자 입니다");
+            return null;
         }
         var dto = entity.toDto();
         UserDetails ud = new User(dto.getEmail(), "", List.of());
         return ud;
     }
 
+
+    public UserDetails loadUserByEmail(String email) {
+        return loadUserByUsername(email);
+    }
 }
