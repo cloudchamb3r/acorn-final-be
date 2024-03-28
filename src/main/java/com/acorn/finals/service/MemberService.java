@@ -110,4 +110,20 @@ public class MemberService {
     public String getMemberChannelRole(Integer memberId, int channelId) {
         return channelMemberMapper.findRoleByMemberIdAndChannelId(memberId, channelId);
     }
+
+    @Transactional
+    public int joinConnection(Integer memberId) {
+        var entity = memberMapper.findOneById(memberId);
+        entity.setActiveConnectionCount(entity.getActiveConnectionCount() + 1);
+        memberMapper.updateActiveConnectionCount(entity);
+        return entity.getActiveConnectionCount();
+    }
+
+    @Transactional
+    public int leaveConnection(Integer memberId) {
+        var entity = memberMapper.findOneById(memberId);
+        entity.setActiveConnectionCount(Math.max(0, entity.getActiveConnectionCount() - 1));
+        memberMapper.updateActiveConnectionCount(entity);
+        return entity.getActiveConnectionCount();
+    }
 }

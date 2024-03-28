@@ -22,16 +22,19 @@ import org.springframework.web.socket.WebSocketSession;
 @Slf4j
 public class ConnectionController {
     private static final Map<WebSocketSession, Integer> sessionMemberIdMapping = new HashMap<>();
-    private static final Map<Integer, Integer> activeConnectionCount = new HashMap<>();
     private final MemberService memberService;
     private final ObjectMapper objectMapper;
 
     @WebSocketMapping("/ping")
     public void connect(@RequestBody MemberDto myInfo, WebSocketSession session, WebSocketSessionInfo sessionInfo) {
         MemberDto member = memberService.findMemberById(myInfo.getId());
-        sessionMemberIdMapping.put(session, member.getId());
+        if (!sessionMemberIdMapping.containsKey(session)) {
+            sessionMemberIdMapping.put(session, member.getId());
+            memberService.joinConnection(member.getId());
+        }
         member.setStatus("online");
         memberService.updateStatus(member);
+
         var channelIds = memberService.findAllJoinedChannelIdByMember(myInfo);
         channelIds.forEach(id -> sessionInfo.sendAll(String.format("/connection/channel/%d/members", id),
                 memberService.findAllMemberByChannelId(id), objectMapper));
@@ -41,7 +44,8 @@ public class ConnectionController {
     public void onClose(WebSocketSession session, WebSocketSessionInfo sessionInfo) {
         var memberId = sessionMemberIdMapping.get(session);
         if (memberId == null) return;
-        var result = activeConnectionCount.computeIfPresent(memberId, (k, v) -> v - 1);
+
+        Integer result = memberService.leaveConnection(memberId);
         if (result != null && result == 0) {
             var member = memberService.findMemberById(memberId);
             member.setStatus("offline");

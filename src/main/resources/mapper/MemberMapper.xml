@@ -51,4 +51,10 @@
         set status = 'offline'
         where email = #{email}
     </update>
+
+    <update id="updateActiveConnectionCount">
+        update member
+        set active_connection_count = #{activeConnectionCount}
+        where id = #{id}
+    </update>
 </mapper>

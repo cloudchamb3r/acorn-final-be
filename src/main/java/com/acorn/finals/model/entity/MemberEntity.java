@@ -17,6 +17,7 @@ public class MemberEntity extends BaseEntity {
     Integer hashtag;
     String status;
     String dissectNickname;
+    Integer activeConnectionCount;
 
     public MemberDto toDto() {
         return new MemberDto(id, email, nickname, hashtag, status);

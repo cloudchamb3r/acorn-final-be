@@ -48,7 +48,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         var nounIndex = rand.nextInt(0, 20);
         var nickname = String.join(" ", adjectives[adjectiveIndex], nouns[nounIndex]);
         var hashtag = rand.nextInt(1000, 10000);
-        return new MemberEntity(null, email, nickname, hashtag, "online", HangulUtils.dissectHangul(nickname));
+        return new MemberEntity(null, email, nickname, hashtag, "online", HangulUtils.dissectHangul(nickname), 0);
     }
 
     @Override

@@ -19,5 +19,7 @@ public interface MemberMapper {
 
     int update(MemberEntity entity);
 
+    int updateActiveConnectionCount(MemberEntity entity);
+
     int deleteById(int id);
 }
