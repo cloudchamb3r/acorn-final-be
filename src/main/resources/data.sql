@@ -1,4 +1,4 @@
-update member set status = 'offline';
+update member set status = 'offline', active_connection_count = 0;
 
 -- add dummy users
 insert into MEMBER(ID, EMAIL, NICKNAME, HASHTAG)
